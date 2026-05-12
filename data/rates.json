@@ -1,9 +1,28 @@
 {
-  "updated_at": "2026-01-01T00:00:00+00:00",
+  "updated_at": "2026-05-12T15:54:34.444473+00:00",
   "mexc": [],
   "others": {
     "Binance": [],
-    "OKX": [],
+    "OKX": [
+      {
+        "currency": "USDT",
+        "apy": 0.0,
+        "type": "活期",
+        "duration": "活期",
+        "min_amount": "-",
+        "product_name": "Simple Earn 活期",
+        "link": "https://www.okx.com/earn"
+      },
+      {
+        "currency": "USDC",
+        "apy": 0.0,
+        "type": "活期",
+        "duration": "活期",
+        "min_amount": "-",
+        "product_name": "Simple Earn 活期",
+        "link": "https://www.okx.com/earn"
+      }
+    ],
     "Bybit": [],
     "Gate.io": [],
     "HTX": [],
