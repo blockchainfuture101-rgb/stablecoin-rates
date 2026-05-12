@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>穩定幣理財年化率比較</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang TC','Noto Sans TC',sans-serif;background:#f0f4f8;color:#1a202c;min-height:100vh}
+
+/* ── Header ── */
+header{background:linear-gradient(135deg,#0f172a 0%,#1e293b 60%,#0f3460 100%);color:#fff;padding:20px 32px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;box-shadow:0 2px 16px rgba(0,0,0,.4)}
+header h1{font-size:1.45rem;font-weight:800;letter-spacing:-.5px}
+header h1 span{color:#fbbf24}
+.header-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.last-updated{color:#34d399;font-size:.82rem;font-weight:600}
+.update-note{color:#94a3b8;font-size:.75rem}
+
+/* ── Container ── */
+.container{max-width:1280px;margin:0 auto;padding:24px 16px}
+
+/* ── Filter bar ── */
+.filter-bar{background:#fff;border-radius:12px;padding:14px 20px;margin-bottom:20px;display:flex;gap:20px;align-items:center;flex-wrap:wrap;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.filter-group{display:flex;align-items:center;gap:8px}
+.filter-label{font-size:.82rem;color:#64748b;font-weight:600;white-space:nowrap}
+.fbtn{padding:5px 14px;border-radius:20px;border:1.5px solid #e2e8f0;background:#fff;color:#475569;cursor:pointer;font-size:.82rem;font-weight:500;transition:all .15s}
+.fbtn:hover{border-color:#6366f1;color:#6366f1}
+.fbtn.active{background:#6366f1;border-color:#6366f1;color:#fff}
+.filter-note{margin-left:auto;font-size:.75rem;color:#94a3b8}
+
+/* ── Stats cards ── */
+.stats-row{display:flex;gap:14px;margin-bottom:24px;flex-wrap:wrap}
+.stat-card{background:#fff;border-radius:12px;padding:16px 20px;flex:1;min-width:145px;box-shadow:0 1px 4px rgba(0,0,0,.07);border-top:3px solid #6366f1;transition:transform .15s}
+.stat-card:hover{transform:translateY(-2px)}
+.stat-card.mexc-card{border-top-color:#f97316}
+.stat-card.compare-card{border-top-color:#0ea5e9}
+.stat-card.avg-card{border-top-color:#10b981}
+.stat-label{font-size:.72rem;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.stat-value{font-size:1.6rem;font-weight:800;color:#1e293b;line-height:1}
+.stat-sub{font-size:.75rem;color:#64748b;margin-top:5px}
+
+/* ── Section ── */
+.section{margin-bottom:32px}
+.section-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.section-title{font-size:1.1rem;font-weight:800;color:#1e293b}
+.section-badge{font-size:.72rem;padding:3px 10px;border-radius:12px;font-weight:700}
+.mexc-badge{background:#fff7ed;color:#ea580c}
+.comp-badge{background:#eff6ff;color:#2563eb}
+
+/* ── Table wrapper ── */
+.table-wrap{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.08)}
+.mexc .table-wrap{border:1.5px solid #fed7aa}
+.competitors .table-wrap{border:1.5px solid #bfdbfe}
+.table-scroll{overflow-x:auto}
+
+/* ── Table ── */
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+thead tr{border-bottom:2px solid #f1f5f9}
+.mexc thead tr{background:#fff7ed}
+.competitors thead tr{background:#eff6ff}
+th{padding:11px 14px;text-align:left;font-size:.72rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;cursor:pointer;user-select:none;white-space:nowrap;transition:background .1s}
+th:hover{background:rgba(99,102,241,.06)}
+th.sort-asc .si::after{content:'↑';color:#6366f1}
+th.sort-desc .si::after{content:'↓';color:#6366f1}
+th .si::after{content:'↕';opacity:.35;margin-left:4px;font-size:.75rem}
+tbody tr{border-bottom:1px solid #f8fafc;transition:background .1s}
+tbody tr:last-child{border:none}
+tbody tr:hover{background:#f8fafc}
+td{padding:12px 14px;vertical-align:middle}
+
+/* ── APY ── */
+.apy{font-weight:800;font-size:1.05rem}
+.apy-high{color:#16a34a}
+.apy-mid{color:#d97706}
+.apy-low{color:#94a3b8}
+.apy-mark{font-size:.65rem;font-weight:600;vertical-align:super;margin-left:1px}
+
+/* ── Badges ── */
+.cbadge{display:inline-block;padding:2px 9px;border-radius:7px;font-size:.75rem;font-weight:700;white-space:nowrap}
+.c-usdt{background:#d1fae5;color:#065f46}
+.c-usdc{background:#dbeafe;color:#1e40af}
+.c-busd{background:#fef9c3;color:#713f12}
+.c-other{background:#f3f4f6;color:#374151}
+
+.tbadge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:.73rem;font-weight:600}
+.t-flex{background:#ede9fe;color:#5b21b6}
+.t-fix{background:#fef3c7;color:#92400e}
+
+/* ── Link btn ── */
+.go{display:inline-block;padding:5px 13px;background:#6366f1;color:#fff;border-radius:8px;text-decoration:none;font-size:.78rem;font-weight:700;transition:background .15s;white-space:nowrap}
+.go:hover{background:#4f46e5}
+
+/* ── Exchange logo ── */
+.ex-name{display:flex;align-items:center;gap:8px;font-weight:700;color:#1e293b;white-space:nowrap}
+.ex-dot{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:800;flex-shrink:0;color:#fff}
+
+/* ── Empty / Loading ── */
+.empty{text-align:center;padding:40px;color:#94a3b8;font-size:.88rem}
+.spinner{width:28px;height:28px;border:3px solid #e2e8f0;border-top-color:#6366f1;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Responsive ── */
+@media(max-width:640px){
+  header{padding:14px 16px}
+  header h1{font-size:1.1rem}
+  .container{padding:14px 10px}
+  .stat-value{font-size:1.3rem}
+  td,th{padding:9px 10px}
+  .filter-note{display:none}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>📊 穩定幣理財 <span>年化率</span> 比較</h1>
+    <div style="font-size:.78rem;color:#94a3b8;margin-top:3px">CEX 交易所 · 穩定幣 Earn 產品彙整</div>
+  </div>
+  <div class="header-right">
+    <div class="update-note">⏱ 每 2 小時自動更新</div>
+    <div class="last-updated" id="lastUpdated">載入中...</div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- 篩選列 -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <span class="filter-label">幣種</span>
+      <button class="fbtn active" onclick="setFilter('coin','all',this)">全部</button>
+      <button class="fbtn" onclick="setFilter('coin','USDT',this)">USDT</button>
+      <button class="fbtn" onclick="setFilter('coin','USDC',this)">USDC</button>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">類型</span>
+      <button class="fbtn active" onclick="setFilter('type','all',this)">全部</button>
+      <button class="fbtn" onclick="setFilter('type','活期',this)">活期</button>
+      <button class="fbtn" onclick="setFilter('type','定期',this)">定期</button>
+    </div>
+    <span class="filter-note">⚠️ 數據僅供參考，投資前請以交易所官網為準</span>
+  </div>
+
+  <!-- 統計卡片 -->
+  <div class="stats-row">
+    <div class="stat-card mexc-card">
+      <div class="stat-label">MEXC 最高年化</div>
+      <div class="stat-value" id="sMexcMax">--</div>
+      <div class="stat-sub" id="sMexcMaxInfo">載入中</div>
+    </div>
+    <div class="stat-card compare-card">
+      <div class="stat-label">競品最高年化</div>
+      <div class="stat-value" id="sOthMax">--</div>
+      <div class="stat-sub" id="sOthMaxInfo">載入中</div>
+    </div>
+    <div class="stat-card avg-card">
+      <div class="stat-label">競品 USDT 活期均值</div>
+      <div class="stat-value" id="sOthAvg">--</div>
+      <div class="stat-sub">所有競品活期 USDT 平均</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">MEXC 領先幅度</div>
+      <div class="stat-value" id="sLead">--</div>
+      <div class="stat-sub" id="sLeadInfo">vs 競品最高</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">資料覆蓋</div>
+      <div class="stat-value" id="sCount">--</div>
+      <div class="stat-sub" id="sCountSub">個交易所</div>
+    </div>
+  </div>
+
+  <!-- MEXC 區塊 -->
+  <div class="section mexc">
+    <div class="section-header">
+      <div class="section-title">🟠 MEXC 理財產品</div>
+      <span class="section-badge mexc-badge" id="mexcBadge">載入中</span>
+    </div>
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table id="mexcTable">
+          <thead>
+            <tr>
+              <th onclick="sort('mexc','currency')">幣種<span class="si"></span></th>
+              <th onclick="sort('mexc','product_name')">產品名稱<span class="si"></span></th>
+              <th onclick="sort('mexc','type')">類型<span class="si"></span></th>
+              <th onclick="sort('mexc','duration')">期限<span class="si"></span></th>
+              <th onclick="sort('mexc','apy')">年化率<span class="si"></span></th>
+              <th>最低申購</th>
+              <th>連結</th>
+            </tr>
+          </thead>
+          <tbody id="mexcBody"><tr><td colspan="7" class="empty"><div class="spinner"></div>資料載入中...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 競品區塊 -->
+  <div class="section competitors">
+    <div class="section-header">
+      <div class="section-title">🔵 競品交易所比較</div>
+      <span class="section-badge comp-badge" id="compBadge">載入中</span>
+    </div>
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table id="compTable">
+          <thead>
+            <tr>
+              <th onclick="sort('comp','exchange')">交易所<span class="si"></span></th>
+              <th onclick="sort('comp','currency')">幣種<span class="si"></span></th>
+              <th onclick="sort('comp','product_name')">產品名稱<span class="si"></span></th>
+              <th onclick="sort('comp','type')">類型<span class="si"></span></th>
+              <th onclick="sort('comp','duration')">期限<span class="si"></span></th>
+              <th onclick="sort('comp','apy')">年化率<span class="si"></span></th>
+              <th>最低申購</th>
+              <th>連結</th>
+            </tr>
+          </thead>
+          <tbody id="compBody"><tr><td colspan="8" class="empty"><div class="spinner"></div>資料載入中...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+// ── 狀態 ──────────────────────────────────
+let RAW = null;
+let filters = { coin: 'all', type: 'all' };
+let sortState = {
+  mexc: { col: 'apy', dir: 'desc' },
+  comp: { col: 'apy', dir: 'desc' }
+};
+
+// ── 交易所外觀設定 ─────────────────────────
+const EX_CFG = {
+  'Binance': { bg: '#F3BA2F', abbr: 'BN' },
+  'OKX':     { bg: '#1a1a1a', abbr: 'OKX' },
+  'Bybit':   { bg: '#F7A600', abbr: 'BY' },
+  'Gate.io': { bg: '#2354e6', abbr: 'GT' },
+  'HTX':     { bg: '#1677FF', abbr: 'HTX' },
+  'KuCoin':  { bg: '#23AF91', abbr: 'KC' },
+  'Bitget':  { bg: '#00C4C4', abbr: 'BG' },
+  'BingX':   { bg: '#1A73E8', abbr: 'BX' },
+  'MEXC':    { bg: '#1AABF9', abbr: 'MX' },
+};
+
+// ── 輔助函式 ──────────────────────────────
+function apyClass(v){ return v>=10?'apy-high':v>=5?'apy-mid':'apy-low' }
+
+function coinBadge(c){
+  const cls = c==='USDT'?'c-usdt':c==='USDC'?'c-usdc':c==='BUSD'?'c-busd':'c-other';
+  return `<span class="cbadge ${cls}">${c}</span>`;
+}
+
+function typeBadge(t){
+  return `<span class="tbadge ${t==='活期'?'t-flex':'t-fix'}">${t}</span>`;
+}
+
+function fmtMin(v, coin){
+  if(!v||v==='-'||v==='N/A') return '-';
+  const n=parseFloat(v);
+  if(isNaN(n)) return v;
+  return (n>=1000?n.toLocaleString():n) + ' ' + coin;
+}
+
+function fmtApy(v){
+  const n=parseFloat(v)||0;
+  return `<span class="apy ${apyClass(n)}">${n.toFixed(2)}<span class="apy-mark">%</span></span>`;
+}
+
+function exDot(name){
+  const cfg = EX_CFG[name]||{ bg:'#94a3b8', abbr: name.substring(0,2).toUpperCase() };
+  return `<span class="ex-dot" style="background:${cfg.bg}">${cfg.abbr}</span>`;
+}
+
+// ── 篩選 ──────────────────────────────────
+function filterItems(arr){
+  return arr.filter(i=>{
+    if(filters.coin!=='all' && i.currency!==filters.coin) return false;
+    if(filters.type!=='all' && i.type!==filters.type) return false;
+    return true;
+  });
+}
+
+// ── 排序 ──────────────────────────────────
+function sortItems(arr, col, dir){
+  return [...arr].sort((a,b)=>{
+    let va=a[col]??'', vb=b[col]??'';
+    if(col==='apy'){ va=parseFloat(va)||0; vb=parseFloat(vb)||0; }
+    else { va=String(va).toLowerCase(); vb=String(vb).toLowerCase(); }
+    if(va<vb) return dir==='asc'?-1:1;
+    if(va>vb) return dir==='asc'?1:-1;
+    return 0;
+  });
+}
+
+// ── 更新表頭排序圖示 ──────────────────────
+function updateSortHeaders(tableId, col, dir){
+  document.querySelectorAll(`#${tableId} th`).forEach(th=>{
+    th.classList.remove('sort-asc','sort-desc');
+    const onclick = th.getAttribute('onclick')||'';
+    if(onclick.includes(`'${col}'`)){
+      th.classList.add(dir==='asc'?'sort-asc':'sort-desc');
+    }
+  });
+}
+
+// ── Render MEXC ───────────────────────────
+function renderMexc(data){
+  const items = filterItems(data);
+  const { col, dir } = sortState.mexc;
+  const sorted = sortItems(items, col, dir);
+  document.getElementById('mexcBadge').textContent = `${items.length} 個產品`;
+  updateSortHeaders('mexcTable', col, dir);
+  const tbody = document.getElementById('mexcBody');
+  if(!sorted.length){
+    tbody.innerHTML='<tr><td colspan="7" class="empty">目前無符合條件的產品</td></tr>';
+    return;
+  }
+  tbody.innerHTML = sorted.map(r=>`
+    <tr>
+      <td>${coinBadge(r.currency)}</td>
+      <td style="color:#374151">${r.product_name}</td>
+      <td>${typeBadge(r.type)}</td>
+      <td style="color:#64748b;font-size:.85rem">${r.duration}</td>
+      <td>${fmtApy(r.apy)}</td>
+      <td style="color:#64748b;font-size:.83rem">${fmtMin(r.min_amount,r.currency)}</td>
+      <td><a href="${r.link}" target="_blank" rel="noopener" class="go">前往 →</a></td>
+    </tr>`).join('');
+}
+
+// ── Render 競品 ───────────────────────────
+function renderComp(othersData){
+  let flat = [];
+  for(const [ex, items] of Object.entries(othersData)){
+    items.forEach(i=>flat.push({...i, exchange:ex}));
+  }
+  const items = filterItems(flat);
+  const { col, dir } = sortState.comp;
+  const sorted = sortItems(items, col, dir);
+  document.getElementById('compBadge').textContent = `${items.length} 個產品`;
+  updateSortHeaders('compTable', col, dir);
+  const tbody = document.getElementById('compBody');
+  if(!sorted.length){
+    tbody.innerHTML='<tr><td colspan="8" class="empty">目前無符合條件的產品</td></tr>';
+    return;
+  }
+  tbody.innerHTML = sorted.map(r=>`
+    <tr>
+      <td><div class="ex-name">${exDot(r.exchange)}${r.exchange}</div></td>
+      <td>${coinBadge(r.currency)}</td>
+      <td style="color:#374151">${r.product_name}</td>
+      <td>${typeBadge(r.type)}</td>
+      <td style="color:#64748b;font-size:.85rem">${r.duration}</td>
+      <td>${fmtApy(r.apy)}</td>
+      <td style="color:#64748b;font-size:.83rem">${fmtMin(r.min_amount,r.currency)}</td>
+      <td><a href="${r.link}" target="_blank" rel="noopener" class="go">前往 →</a></td>
+    </tr>`).join('');
+}
+
+// ── 統計卡片 ──────────────────────────────
+function updateStats(data){
+  const mexcFiltered = filterItems(data.mexc);
+  let othersFlat = [];
+  for(const items of Object.values(data.others)) othersFlat = othersFlat.concat(items);
+  const othersFiltered = filterItems(othersFlat);
+
+  // MEXC 最高
+  if(mexcFiltered.length){
+    const best = mexcFiltered.reduce((a,b)=>a.apy>b.apy?a:b);
+    document.getElementById('sMexcMax').textContent = best.apy.toFixed(2)+'%';
+    document.getElementById('sMexcMaxInfo').textContent = `${best.currency} · ${best.duration}`;
+  } else {
+    document.getElementById('sMexcMax').textContent = '--';
+    document.getElementById('sMexcMaxInfo').textContent = '無資料';
+  }
+
+  // 競品最高
+  if(othersFiltered.length){
+    const best = othersFiltered.reduce((a,b)=>a.apy>b.apy?a:b);
+    document.getElementById('sOthMax').textContent = best.apy.toFixed(2)+'%';
+    document.getElementById('sOthMaxInfo').textContent = `${best.exchange} · ${best.currency}`;
+  } else {
+    document.getElementById('sOthMax').textContent = '--';
+    document.getElementById('sOthMaxInfo').textContent = '無資料';
+  }
+
+  // 競品活期 USDT 均值（不受幣種篩選影響，恆顯示全體均值）
+  const usdtFlex = othersFlat.filter(i=>i.currency==='USDT'&&i.type==='活期');
+  if(usdtFlex.length){
+    const avg = usdtFlex.reduce((s,i)=>s+i.apy,0)/usdtFlex.length;
+    document.getElementById('sOthAvg').textContent = avg.toFixed(2)+'%';
+  } else {
+    document.getElementById('sOthAvg').textContent = '--';
+  }
+
+  // MEXC 領先幅度
+  const mexcAll = data.mexc.filter(i=>i.currency==='USDT'&&i.type==='活期');
+  const othMax  = usdtFlex.length ? usdtFlex.reduce((a,b)=>a.apy>b.apy?a:b).apy : null;
+  const mexcMax = mexcAll.length  ? mexcAll.reduce((a,b)=>a.apy>b.apy?a:b).apy  : null;
+  if(mexcMax!==null && othMax!==null){
+    const diff = mexcMax - othMax;
+    const el = document.getElementById('sLead');
+    el.textContent = (diff>=0?'+':'')+diff.toFixed(2)+'%';
+    el.style.color = diff>=0?'#16a34a':'#dc2626';
+    document.getElementById('sLeadInfo').textContent = `USDT 活期 vs 競品最高`;
+  } else {
+    document.getElementById('sLead').textContent = '--';
+  }
+
+  // 覆蓋數
+  const exCount = Object.keys(data.others).length + 1;
+  const total = data.mexc.length + othersFlat.length;
+  document.getElementById('sCount').textContent = exCount;
+  document.getElementById('sCountSub').textContent = `共 ${total} 個產品`;
+}
+
+// ── 排序觸發 ──────────────────────────────
+function sort(section, col){
+  const s = sortState[section];
+  s.dir = s.col===col ? (s.dir==='desc'?'asc':'desc') : 'desc';
+  s.col = col;
+  if(!RAW) return;
+  if(section==='mexc') renderMexc(RAW.mexc);
+  else renderComp(RAW.others);
+}
+
+// ── 篩選觸發 ──────────────────────────────
+function setFilter(key, val, btn){
+  filters[key] = val;
+  btn.closest('.filter-group').querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(!RAW) return;
+  renderMexc(RAW.mexc);
+  renderComp(RAW.others);
+  updateStats(RAW);
+}
+
+// ── 時間格式化 ────────────────────────────
+function fmtDate(iso){
+  try{
+    const d = new Date(iso);
+    return '最後更新：' + d.toLocaleString('zh-TW',{
+      timeZone:'Asia/Taipei',
+      year:'numeric',month:'2-digit',day:'2-digit',
+      hour:'2-digit',minute:'2-digit'
+    });
+  } catch{ return iso; }
+}
+
+// ── 載入資料 ──────────────────────────────
+async function loadData(){
+  try{
+    const res = await fetch('data/rates.json?t='+Date.now());
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    RAW = await res.json();
+    document.getElementById('lastUpdated').textContent = fmtDate(RAW.updated_at);
+    renderMexc(RAW.mexc);
+    renderComp(RAW.others);
+    updateStats(RAW);
+  } catch(e){
+    console.error(e);
+    document.getElementById('lastUpdated').textContent = '⚠ 資料載入失敗';
+    ['mexcBody','compBody'].forEach(id=>{
+      const cols = id==='mexcBody'?7:8;
+      document.getElementById(id).innerHTML=
+        `<tr><td colspan="${cols}" class="empty">⚠️ 無法取得資料，請稍後重試</td></tr>`;
+    });
+  }
+}
+
+loadData();
+setInterval(loadData, 5*60*1000); // 每 5 分鐘自動刷新頁面資料
+</script>
+</body>
+</html>
