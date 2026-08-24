@@ -1,20 +1,11 @@
 {
-  "updated_at": "2026-08-24T01:45:28.036985+00:00",
+  "updated_at": "2026-08-24T03:09:40.461400+00:00",
   "mexc": [],
   "others": {
     "Binance": [],
     "OKX": [
       {
         "currency": "USDT",
-        "apy": 0.0,
-        "type": "活期",
-        "duration": "活期",
-        "min_amount": "-",
-        "product_name": "Simple Earn 活期",
-        "link": "https://www.okx.com/earn"
-      },
-      {
-        "currency": "USDC",
         "apy": 0.0,
         "type": "活期",
         "duration": "活期",
